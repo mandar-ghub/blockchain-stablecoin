@@ -21,8 +21,14 @@ const s = {
 const Badge=({color,bg,children,style={}})=><span style={{display:"inline-flex",alignItems:"center",gap:3,fontSize:11,fontWeight:500,padding:"2px 8px",borderRadius:20,background:bg,color,...style}}>{children}</span>;
 const Btn=({onClick,disabled,children,bg=C.blue,color="#fff",outline=false,style={}})=><button onClick={onClick} disabled={disabled} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",fontSize:13,fontWeight:500,borderRadius:6,cursor:disabled?"not-allowed":"pointer",border:outline?"0.5px solid var(--color-border-secondary)":"none",background:outline?"transparent":bg,color:outline?"var(--color-text-primary)":color,opacity:disabled?0.4:1,...style}}>{children}</button>;
 const Field=({label,children})=><div style={s.field}><label style={s.label}>{label}</label>{children}</div>;
-const Inp=({value,onChange,type="text",placeholder="",disabled=false,style={}})=><input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} disabled={disabled} style={{...s.inp,...style}}/>;
-const Sel=({value,onChange,options,disabled=false})=><select value={value} onChange={e=>onChange(e.target.value)} disabled={disabled} style={{...s.inp,cursor:"pointer"}}>{options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}</select>;
+const Inp=({value,onChange,type="text",placeholder="",disabled=false,style={}})=>{
+  const activeStyle=!disabled?{borderLeft:"3px solid #1a4fd6",background:"#f0f4ff"}:{};
+  return <input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} disabled={disabled} style={{...s.inp,...activeStyle,...style}}/>;
+};
+const Sel=({value,onChange,options,disabled=false})=>{
+  const activeStyle=!disabled?{borderLeft:"3px solid #1a4fd6",background:"#f0f4ff"}:{};
+  return <select value={value} onChange={e=>onChange(e.target.value)} disabled={disabled} style={{...s.inp,cursor:disabled?"not-allowed":"pointer",...activeStyle}}>{options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}</select>;
+};
 const CheckRow=({icon,iconBg,iconColor,title,desc,badge,badgeBg,badgeColor,last=false})=>(
   <div style={{display:"flex",alignItems:"flex-start",gap:10,padding:"9px 0",borderBottom:last?"none":"0.5px solid var(--color-border-tertiary)"}}>
     <div style={{width:24,height:24,borderRadius:"50%",background:iconBg,color:iconColor,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginTop:1}}>{icon}</div>
@@ -141,6 +147,7 @@ const KYCModule=({addTxEvent})=>{
   if(stage===4&&outcome==="pass") ps[4]="done";
   return (
     <div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 16px",background:"#f0fdf4",border:"1px solid #15803d",borderRadius:8,marginBottom:"1.25rem"}}><span style={{fontSize:22}}>🛡</span><div><div style={{fontSize:14,fontWeight:600,color:"#15803d",marginBottom:3}}>Scenario: KYC onboarding and AML compliance gate — SwiftSend customer screening</div><div style={{fontSize:12,color:"#6b7280",lineHeight:1.6}}>Before any customer can send money via SwiftSend, they must pass a multi-layer compliance gate. Choose one of five pre-built scenarios — from a clean low-risk customer to a sanctions hit or structuring pattern — and watch identity verification, sanctions list screening, PEP checks, and transaction-level AML rules run in sequence. Each scenario produces a different outcome: cleared for transfer, enhanced due diligence hold, account freeze, or SAR filing. This gate runs on every new customer and on every individual transaction. After a cleared transaction, check the <strong>MMCoin Labs Console</strong> tab to see stablecoin mint and burn activity details.</div></div></div>
       <div style={{display:"flex",alignItems:"center",marginBottom:"1.5rem"}}>{["KYC form","Identity","AML screen","Txn review","Cleared"].map((l,i)=><span key={l} style={{display:"contents"}}>{i>0&&<PipelineLine done={ps[i-1]==="done"}/>}<PipelineDot icon={["P","ID","AM","TX","OK"][i]} label={l} state={ps[i]}/></span>)}</div>
       {stage===0&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
         <div style={s.card}>
@@ -175,7 +182,7 @@ const KYCModule=({addTxEvent})=>{
             {outcome==="structuring"&&<><Badge bg={C.redLt} color={C.red} style={{marginBottom:8}}>Structuring detected - blocked</Badge><div style={{fontSize:12,color:C.gray,marginBottom:8}}>Sub-$3,000 pattern (31 U.S.C. 5324). SAR filed.</div><Badge bg={C.amberLt} color={C.amber}>SAR filing required</Badge></>}
           </div>)}
           <div style={s.card}><div style={s.eyebrow}>Audit trail</div><div style={{maxHeight:280,overflowY:"auto",marginTop:8}}>{audit.length===0?<div style={{fontSize:12,color:C.gray,textAlign:"center",padding:12}}>No events yet</div>:audit.map((e,i)=><AuditEntry key={i} dot={e.color} msg={e.msg} who={e.who} time={e.time}/>)}</div></div>
-          <Btn onClick={()=>{setStage(0);setIdRes([]);setAmlRes([]);setTxnRes([]);setAudit([]);setOutcome(null);}} outline>Reset</Btn>
+          <Btn onClick={()=>{setStage(0);setIdRes([]);setAmlRes([]);setTxnRes([]);setAudit([]);setOutcome(null);}} bg="#374151" style={{width:"100%",justifyContent:"center",marginTop:4}}>↺ Reset — try another scenario</Btn>
         </div>
       </div>)}
     </div>
@@ -205,6 +212,7 @@ const RetailModule=({fxRate,addTxEvent})=>{
   });
   return (
     <div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 16px",background:"#eff6ff",border:"1px solid #1a4fd6",borderRadius:8,marginBottom:"1.25rem"}}><span style={{fontSize:22}}>⚡</span><div><div style={{fontSize:14,fontWeight:600,color:"#1a4fd6",marginBottom:3}}>Scenario: Cross-border retail remittance — US ↔ India</div><div style={{fontSize:12,color:"#6b7280",lineHeight:1.6}}>A consumer sends money between the US and India using SwiftSend, a licensed money transmitter built on MMCoin rails. Select a corridor (US→India or India→US), choose your on-ramp and off-ramp payment rails, and set an amount. The preview shows exactly how fees are deducted before MMCoin is minted — so the reserve always equals the tokens in circulation. Click Send to log the transaction and see the reserve update in the MMCoin Labs Console tab. After sending, check the <strong>MMCoin Labs Console</strong> tab to see stablecoin mint and burn activity details.</div></div></div>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:C.blueLt,borderRadius:6,border:"0.5px solid "+C.blue,marginBottom:"1rem"}}>
         <div style={{width:32,height:32,background:C.blue,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16}}>S</div>
         <div><div style={{fontSize:13,fontWeight:500,color:C.blueDk}}>SwiftSend by Swift Financial Inc.</div><div style={{fontSize:11,color:C.gray}}>Licensed money transmitter - NMLS 1234567 - Powered by MMCoin Labs rails</div></div>
@@ -280,6 +288,7 @@ const B2BModule=({fxRate,addTxEvent})=>{
   });
   return (
     <div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 16px",background:"#f5f3ff",border:"1px solid #6d28d9",borderRadius:8,marginBottom:"1.25rem"}}><span style={{fontSize:22}}>🏦</span><div><div style={{fontSize:14,fontWeight:600,color:"#6d28d9",marginBottom:3}}>Scenario: B2B corporate treasury transfer via GlobalFirst Bank</div><div style={{fontSize:12,color:"#6b7280",lineHeight:1.6}}>GlobalFirst Bank offers MMCoin-powered treasury services to large corporate clients who hold accounts in both the US and India. Select a client and corridor, set the transfer amount, and configure the FX spread GlobalFirst charges on top of the base rate. The fee breakdown shows how GlobalFirst earns revenue while MMCoin Labs takes a smaller institutional fee. Transfers settle in under 30 minutes — compare that to 1–3 business days for a traditional correspondent banking wire. After executing, check the <strong>MMCoin Labs Console</strong> tab to see stablecoin mint and burn activity details.</div></div></div>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:C.purpleLt,borderRadius:6,border:"0.5px solid "+C.purple,marginBottom:"1rem"}}>
         <div style={{width:32,height:32,background:C.purple,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16}}>B</div>
         <div><div style={{fontSize:13,fontWeight:500,color:C.purple}}>GlobalFirst Bank - Corporate Treasury Portal</div><div style={{fontSize:11,color:C.gray}}>Licensed bank - MMCoin-powered cross-border treasury</div></div>
@@ -345,9 +354,11 @@ const ApprovalModule=({fxRate,addTxEvent})=>{
   const approve=()=>{if(user==="david"){setApprovals(a=>({...a,david:"approved"}));addAudit("Approval 1 granted","Approver 1",C.green);needsDual?setStage("approved1"):setStage("approved2");}else{setApprovals(a=>({...a,priya:"approved"}));addAudit("Approval 2 granted (CFO)","Approver 2",C.purple);setStage("approved2");}setApproverNote("");};
   const reject=()=>{setApprovals(a=>({...a,[user]:"rejected"}));addAudit("Transfer rejected - "+(approverNote||"no reason"),user==="david"?"Approver 1":"Approver 2",C.red);setStage("rejected");setApproverNote("");};
   const execute=()=>{
+    if(usdAmt<=0){alert("Transfer amount must be greater than zero.");return;}
     setStage("executing");addAudit("Execution sent to MMCoin Labs","GlobalFirst (System)",C.amber);
-    const mmFee=usdAmt*0.0005, fiFee=usdAmt*0.0015, spreadRev=usdAmt*25/10000;
-    const net=usdAmt-fiFee-spreadRev-mmFee;
+    const spreadBpsExec=25; // fixed institutional default; B2BModule has the configurable spread
+    const mmFee=usdAmt*0.0005, fiFee=usdAmt*0.0015, spreadRev=usdAmt*spreadBpsExec/10000;
+    const net=Math.max(0,usdAmt-fiFee-spreadRev-mmFee);
     setTimeout(()=>{
       setStage("settled");addAudit("MMCoin minted, transferred, burned - client credited","MMCoin Labs",C.teal);
       addTxEvent({type:"b2b",provider:"GlobalFirst",corridor,gross:usdAmt,fiFee:fiFee+spreadRev,mmFee,mmcMinted:net,mmcBurned:net,fxRate,label:"GlobalFirst B2B dual-approval settled",color:C.purple,who:"GlobalFirst / MMCoin Labs"});
@@ -359,9 +370,15 @@ const ApprovalModule=({fxRate,addTxEvent})=>{
   const canApprove=(user==="david"&&stage==="submitted"&&!approvals.david)||(user==="priya"&&(stage==="approved1"||(!needsDual&&stage==="submitted"))&&!approvals.priya);
   return (
     <div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 16px",background:"#f0fdf4",border:"1px solid #15803d",borderRadius:8,marginBottom:"1.25rem"}}><span style={{fontSize:22}}>✅</span><div><div style={{fontSize:14,fontWeight:600,color:"#15803d",marginBottom:3}}>Scenario: B2B dual approval — maker-checker control for large corporate transfers</div><div style={{fontSize:12,color:"#6b7280",lineHeight:1.6}}>Transfers above $500K require two independent approvals before GlobalFirst instructs MMCoin Labs to execute. Use the role switcher to act as Maker 1 (creates the request), Approver 1 (Treasury Manager), or Approver 2 (CFO). The approval threshold table updates live as you change the amount — amounts below $100K need only one approver. Every action is written to an immutable audit trail with role, timestamp, and comment, which feeds GlobalFirst's compliance reporting. After settlement, check the <strong>MMCoin Labs Console</strong> tab to see stablecoin mint and burn activity details.</div></div></div>
       <div style={{display:"flex",gap:8,marginBottom:"1rem",padding:"10px",background:"var(--color-background-secondary)",borderRadius:6,alignItems:"center",flexWrap:"wrap"}}>
         <span style={{fontSize:12,color:C.gray,fontWeight:500}}>Acting as:</span>
         {[{k:"riya",name:"Maker 1",role:"Maker",c:C.blue},{k:"david",name:"Approver 1",role:"Approver 1",c:C.green},{k:"priya",name:"Approver 2",role:"CFO Approver 2",c:C.purple}].map(u=><button key={u.k} onClick={()=>setUser(u.k)} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 12px",borderRadius:6,fontSize:12,cursor:"pointer",border:"0.5px solid "+(user===u.k?u.c:"var(--color-border-secondary)"),background:user===u.k?u.c+"18":"var(--color-background-primary)",color:user===u.k?u.c:"var(--color-text-secondary)"}}><div style={{width:22,height:22,borderRadius:"50%",background:u.c,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700}}>{u.name.split(" ").map(w=>w[0]).join("").slice(0,2)}</div>{u.name}<Badge bg={user===u.k?u.c+"18":"var(--color-background-secondary)"} color={user===u.k?u.c:C.gray} style={{fontSize:10}}>{u.role}</Badge></button>)}
+        <div style={{marginLeft:"auto",display:"flex",flexDirection:"column",gap:2,fontSize:11,color:C.gray,textAlign:"right"}}>
+          <span>① Click <strong style={{color:C.blue}}>Maker 1</strong> → fill in amount → Submit for approval</span>
+          <span>② Click <strong style={{color:C.green}}>Approver 1</strong> → review → Approve or Reject</span>
+          <span>③ Click <strong style={{color:C.purple}}>Approver 2</strong> → final sign-off (amounts &gt; $500K only) → Execute</span>
+        </div>
       </div>
       <div style={{display:"flex",alignItems:"center",marginBottom:"1.5rem"}}>{["Draft","Submitted","Approval 1","Approval 2","Executing","Settled"].map((l,i)=><span key={l} style={{display:"contents"}}>{i>0&&<PipelineLine done={ps(i-1)==="done"}/>}<PipelineDot icon={["E","S","1","2","M","OK"][i]} label={l} state={ps(i)}/></span>)}</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
@@ -452,9 +469,10 @@ const ReserveModule=({txEvents,supply,reserve,txLog,ssRev,gfRev,onMint,onBurn})=
 
   return (
     <div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12,padding:"12px 16px",background:"#fffbeb",border:"1px solid #b45309",borderRadius:8,marginBottom:"1.25rem"}}><span style={{fontSize:22}}>🪙</span><div><div style={{fontSize:14,fontWeight:600,color:"#b45309",marginBottom:3}}>Scenario: MMCoin Labs operator view — reserve management and proof of backing</div><div style={{fontSize:12,color:"#6b7280",lineHeight:1.6}}>This is the issuer's control panel. MMCoin Labs maintains a 1:1 USD reserve — every MMC token in circulation must be backed by exactly $1 held in custody. Use the Mint / Burn controls to add or remove tokens from the reserve pool. Every transaction from the Retail and B2B tabs flows into the log here — click any row to expand the full fee breakdown and see why the minted amount is always less than the gross amount sent. The collateral ratio must stay at or above 100% at all times. This tab is the <strong>MMCoin Labs Console</strong> — all mint and burn activity from other tabs flows into the transaction log below.</div></div></div>
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:C.amberLt,borderRadius:6,border:"0.5px solid "+C.amber,marginBottom:"1.25rem"}}>
         <div style={{width:32,height:32,background:C.amber,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:16}}>M</div>
-        <div><div style={{fontSize:13,fontWeight:500,color:C.amber}}>MMCoin Labs - Issuer and Reserve Console</div><div style={{fontSize:11,color:C.gray}}>Click any transaction row to see the full fee breakdown and why MMC minted differs from transfer amount</div></div>
+        <div><div style={{fontSize:13,fontWeight:500,color:C.amber}}>MMCoin Labs Console - Issuer and Reserve</div><div style={{fontSize:11,color:C.gray}}>Click any transaction row to see the full fee breakdown and why MMC minted differs from transfer amount</div></div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:"1.25rem"}}>
         {[["Total MMC in circulation",supply.toFixed(2)+" MMC",C.teal],["USD in reserve (custodian)","$"+reserve.toLocaleString("en-US",{minimumFractionDigits:2}),C.blue],["Collateral ratio",supply>0?ratio.toFixed(1)+"%":"No supply yet",ratio>=100?C.green:ratio>0?C.red:C.gray]].map(([l,v,c])=>(
@@ -512,10 +530,10 @@ const ReserveModule=({txEvents,supply,reserve,txLog,ssRev,gfRev,onMint,onBurn})=
 };
 
 // ─── Root App ─────────────────────────────────────────────────────────────────
-const TABS=[{id:"kyc",label:"KYC / Compliance"},{id:"retail",label:"Retail remittance"},{id:"b2b",label:"B2B treasury"},{id:"approval",label:"Dual approval"},{id:"reserve",label:"Issuer console"}];
+const TABS=[{id:"retail",label:"Retail remittance"},{id:"b2b",label:"B2B treasury"},{id:"reserve",label:"MMCoin Labs Console"},{id:"kyc",label:"KYC / Compliance"},{id:"approval",label:"Dual approval"}];
 
 export default function App() {
-  const [tab,setTab]=useState("kyc");
+  const [tab,setTab]=useState("retail");
   const [fxRate,setFxRate]=useState(FX_DEFAULT);
 
   // All reserve state lives in App — never lost on tab switch
@@ -567,13 +585,13 @@ export default function App() {
       <div style={{display:"flex",borderBottom:"0.5px solid var(--color-border-secondary)",marginBottom:"1.5rem",overflowX:"auto"}}>
         {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"9px 16px",fontSize:13,fontWeight:500,cursor:"pointer",border:"none",borderBottom:"2px solid "+(tab===t.id?C.blue:"transparent"),background:"transparent",color:tab===t.id?C.blue:"var(--color-text-secondary)",whiteSpace:"nowrap"}}>{t.label}</button>)}
       </div>
-      <div style={{display:tab==="kyc"?"block":"none"}}><KYCModule addTxEvent={addTxEvent}/></div>
       <div style={{display:tab==="retail"?"block":"none"}}><RetailModule fxRate={fxRate} addTxEvent={addTxEvent}/></div>
       <div style={{display:tab==="b2b"?"block":"none"}}><B2BModule fxRate={fxRate} addTxEvent={addTxEvent}/></div>
-      <div style={{display:tab==="approval"?"block":"none"}}><ApprovalModule fxRate={fxRate} addTxEvent={addTxEvent}/></div>
       <div style={{display:tab==="reserve"?"block":"none"}}>
         <ReserveModule txEvents={txEvents} supply={supply} reserve={reserve} txLog={txLog} ssRev={ssRev} gfRev={gfRev} onMint={handleMint} onBurn={handleBurn}/>
       </div>
+      <div style={{display:tab==="kyc"?"block":"none"}}><KYCModule addTxEvent={addTxEvent}/></div>
+      <div style={{display:tab==="approval"?"block":"none"}}><ApprovalModule fxRate={fxRate} addTxEvent={addTxEvent}/></div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 # MMCoin Demo — Setup Instructions
 
-This is a single-file React app with no backend, no database, and no API keys required. These instructions assume you are starting from a completely fresh machine, using **WSL (Windows Subsystem for Linux)** as the baseline for Windows users. Mac and Linux users can skip to "Step 1: Install Node.js and npm."
+This is a single-file React app. No backend, no database, no API keys required.
+These instructions assume **WSL (Windows Subsystem for Linux)** as the baseline for Windows users.
+Mac and Linux users can skip straight to Step 1.
 
 ---
 
@@ -14,92 +16,96 @@ If you already have WSL set up, skip to Step 1.
    wsl --install
    ```
 3. Restart your computer when prompted.
-4. After restart, search for "Ubuntu" in the Start menu and open it.
-5. The first time you open it, you'll be asked to create a Linux username and password — these are separate from your Windows login and can be anything you like.
+4. After restart, open **Ubuntu** from the Start menu.
+5. Create a Linux username and password when prompted (separate from your Windows login).
 
 ---
 
 ## Step 1: Install Node.js and npm
 
-Open your WSL/Ubuntu terminal (or, on Mac/Linux, your regular terminal) and run:
+Open your WSL/Ubuntu terminal (or your regular terminal on Mac/Linux) and run:
 
 ```bash
 # Update package lists
 sudo apt update
 
-# Install curl (needed to install nvm)
+# Install curl
 sudo apt install -y curl
 
-# Install nvm (Node Version Manager)
+# Install Node Version Manager (nvm)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
-# Reload your shell so nvm is available
+# Reload your shell
 source ~/.bashrc
 
 # Install the latest LTS version of Node.js
 nvm install --lts
 
-# Confirm installation
+# Confirm installation — both should print version numbers
 node -v
 npm -v
 ```
 
-You should see version numbers for both commands (e.g., `v22.x.x` for node, `10.x.x` for npm). If both print a version, you're ready for Step 2.
+### What gets installed
 
-### Required packages — summary
-
-| Package | Purpose | How it's installed |
+| Package | Purpose | How installed |
 |---|---|---|
-| Node.js (v18+) | JavaScript runtime | via `nvm install --lts` above |
-| npm | Package manager (bundled with Node.js) | comes with Node.js |
-| react, react-dom | UI framework | installed automatically by `create-react-app` |
+| Node.js v18+ | JavaScript runtime | `nvm install --lts` |
+| npm | Package manager | Bundled with Node.js |
+| react, react-dom | UI framework | Auto-installed by `create-react-app` |
 
-No Docker, no database, no cloud account, and no API keys are needed anywhere in this setup.
+No Docker, no database, no cloud account, no API keys needed anywhere.
 
 ---
 
 ## Step 2: Get the demo files
 
-You should have two files:
-- `mmcoin-demo-App.js` — the application code
-- `mmcoin-setup.md` — this file
+Download these two files (attached to the Substack post):
+- `mmcoin-demo-App.js` — the full application
+- `mmcoin-setup.md` — this guide
 
-If you downloaded them via a Windows browser, they're typically in:
+If downloaded via a Windows browser, find them in WSL at:
 ```
 /mnt/c/Users/<your-windows-username>/Downloads/
 ```
-when accessed from inside WSL.
 
 ---
 
-## Step 3: Create the React app
+## Step 3: Create the React app and run it
 
 ```bash
-# Create a new React app (takes 1-2 minutes)
+# Create a new React project (takes 1–2 minutes)
 npx create-react-app mmcoin-demo
 cd mmcoin-demo
 
-# Copy the demo code into place — adjust the source path as needed
+# Copy the demo file in — adjust the path to match where you saved it
 cp /mnt/c/Users/<your-windows-username>/Downloads/mmcoin-demo-App.js src/App.js
 
 # Start the app
 npm start
 ```
 
-This should automatically open `http://localhost:3000` in your default browser. If it doesn't open automatically, navigate there manually.
+Your browser should open automatically at `http://localhost:3000`.
+If it doesn't, navigate there manually.
 
 ---
 
-## Step 4: Use the demo
+## Step 4: Explore the five tabs
 
-Five tabs across the top:
-1. **KYC / Compliance** — pick one of 5 scenarios and watch identity + AML checks run
-2. **Retail remittance** — send money US↔India and see the live fee breakdown
-3. **B2B treasury** — GlobalFirst Bank's corporate transfer portal
-4. **Dual approval** — maker-checker workflow for large transfers
-5. **Issuer console** — MMCoin Labs' reserve dashboard; click any transaction to expand the fee math
+The app opens on **Retail remittance** and has five tabs across the top:
 
-Try adjusting the FX rate at the top of the page — every calculation across all tabs updates live.
+| # | Tab | What it shows |
+|---|---|---|
+| 1 | **Retail remittance** | Consumer sends US↔India via SwiftSend; live fee breakdown |
+| 2 | **B2B treasury** | Corporate transfer via GlobalFirst Bank; FX spread and settlement |
+| 3 | **MMCoin Labs Console** | Issuer view — reserve health, mint/burn controls, fee breakdown per transaction |
+| 4 | **KYC / Compliance** | Five compliance scenarios from clean pass to sanctions hit |
+| 5 | **Dual approval** | Maker-checker workflow; role-switcher guides you through each step |
+
+**Tips:**
+- Change the **FX rate** at the top — all calculations across all tabs update instantly
+- After sending money on any tab, switch to **MMCoin Labs Console** to see the mint and burn activity
+- On the **Dual approval** tab, follow the ①②③ instructions next to the role switcher
 
 ---
 
@@ -107,14 +113,14 @@ Try adjusting the FX rate at the top of the page — every calculation across al
 
 | Problem | Fix |
 |---|---|
-| `command not found: npx` | Run `source ~/.bashrc` again, or close and reopen the terminal |
-| Browser shows "Edit src/App.js and save to reload" placeholder | The file wasn't copied to the right location — confirm it's at `src/App.js` (not `.jsx`) |
-| Blank white page after `npm start` | Open browser DevTools (press F12) → Console tab → look for a red error |
-| `npm start` never opens a browser | Manually visit `http://localhost:3000` |
-| Permission errors during `npm install` | Avoid using `sudo` with npm; if needed, fix ownership with `sudo chown -R $(whoami) ~/.npm` |
+| `command not found: npx` or `npm` | Run `source ~/.bashrc`, or close and reopen the terminal |
+| Browser shows "Edit src/App.js and save to reload" | File wasn't copied correctly — confirm it's at `src/App.js` not `src/App.jsx` |
+| Blank white page | Open browser DevTools (F12) → Console tab → look for a red error |
+| `npm start` never opens a browser | Navigate manually to `http://localhost:3000` |
+| Permission error during install | Avoid `sudo npm` — fix with: `sudo chown -R $(whoami) ~/.npm` |
 
 ---
 
-## What this is and isn't
+## What this demo is and isn't
 
-This demo simulates a stablecoin ecosystem for educational purposes. It does not move real money, connect to real banking rails, or perform real KYC/AML checks — those are realistic-looking but fully synthetic for the purposes of demonstration. All state lives in your browser's memory and resets on page refresh.
+This is an educational simulation. It does **not** move real money, connect to real banking rails, or run real KYC/AML vendor checks — those are modelled with realistic but fully synthetic logic. All state lives in your browser's memory and resets on page refresh. It is a tool for building intuition for how the pieces of a stablecoin ecosystem fit together before engaging with real regulatory frameworks or vendor documentation.
